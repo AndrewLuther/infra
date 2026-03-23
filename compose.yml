@@ -1,0 +1,68 @@
+services:
+  traefik:
+    image: traefik:v3
+    restart: always
+    networks: [web]
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.dittoresolver.acme.email=andrewgluther@gmail.com"
+      - "--certificatesresolvers.dittoresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.dittoresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "127.0.0.1:8080:8080"
+    env_file:
+      - ./.runtime-secrets/traefik.env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik/dynamic:/etc/traefik/dynamic:ro
+      - ./volumes/traefik_letsencrypt_data:/letsencrypt
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
+      - "traefik.enable=true"
+      # HTTP -> HTTPS redirect
+      - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
+      - "traefik.http.routers.http-catchall.entrypoints=web"
+      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https@docker"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+
+  watchtower:
+    image: ghcr.io/nicholas-fedor/watchtower:latest
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    env_file:
+      - ./.runtime-secrets/watchtower.env
+
+  
+  morescore:
+    image: ghcr.io/andrewluther/morescore_website:main
+    restart: always
+    networks: [web]
+    labels:
+      - "traefik.docker.network=infra_web"
+      - "traefik.enable=true"
+      - "traefik.http.services.morescore.loadbalancer.server.port=8000"
+      - "traefik.http.routers.morescore.rule=Host(`morescore.andrewluther.ca`)"
+      - "traefik.http.routers.morescore.entrypoints=websecure"
+      - "traefik.http.routers.morescore.tls.certresolver=dittoresolver"
+
+  andrewluther:
+    image: ghcr.io/andrewluther/website:main
+    restart: always
+    networks: [web]
+    labels:
+      - "traefik.docker.network=infra_web"
+      - "traefik.enable=true"
+      - "traefik.http.services.andrewluther.loadbalancer.server.port=80"
+      - "traefik.http.routers.andrewluther.rule=Host(`andrewluther.ca`)"
+      - "traefik.http.routers.andrewluther.entrypoints=websecure"
+      - "traefik.http.routers.andrewluther.tls.certresolver=dittoresolver"
+
+networks:
+  web:
