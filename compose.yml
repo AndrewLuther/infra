@@ -67,7 +67,7 @@ services:
     labels:
       - "traefik.docker.network=infra_web"
       - "traefik.enable=true"
-      - "traefik.http.services.rps.loadbalancer.server.port=80"
+      - "traefik.http.services.rps.loadbalancer.server.port=3000"
       - "traefik.http.routers.rps.rule=Host(`rps.andrewluther.ca`)"
       - "traefik.http.routers.rps.entrypoints=websecure"
       - "traefik.http.routers.rps.tls.certresolver=dittoresolver"
