@@ -60,5 +60,17 @@ services:
       - "traefik.http.routers.andrewluther.entrypoints=websecure"
       - "traefik.http.routers.andrewluther.tls.certresolver=dittoresolver"
 
+  rps:
+    image: ghcr.io/andrewluther/rock_paper_scissors:main
+    restart: always
+    networks: [web]
+    labels:
+      - "traefik.docker.network=infra_web"
+      - "traefik.enable=true"
+      - "traefik.http.services.rps.loadbalancer.server.port=80"
+      - "traefik.http.routers.rps.rule=Host(`rps.andrewluther.ca`)"
+      - "traefik.http.routers.rps.entrypoints=websecure"
+      - "traefik.http.routers.rps.tls.certresolver=dittoresolver"
+
 networks:
   web:
