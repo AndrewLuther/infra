@@ -34,6 +34,8 @@ services:
     restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_LABEL_ENABLE=true
 
   
   morescore:
@@ -47,6 +49,7 @@ services:
       - "traefik.http.routers.morescore.rule=Host(`morescore.andrewluther.ca`)"
       - "traefik.http.routers.morescore.entrypoints=websecure"
       - "traefik.http.routers.morescore.tls.certresolver=dittoresolver"
+      - "com.centurylinklabs.watchtower.enable:false"
 
   andrewluther:
     image: ghcr.io/andrewluther/website:main
@@ -59,6 +62,7 @@ services:
       - "traefik.http.routers.andrewluther.rule=Host(`andrewluther.ca`)"
       - "traefik.http.routers.andrewluther.entrypoints=websecure"
       - "traefik.http.routers.andrewluther.tls.certresolver=dittoresolver"
+      - "com.centurylinklabs.watchtower.enable:true"
 
   rps:
     image: ghcr.io/andrewluther/rock_paper_scissors:main
@@ -71,6 +75,7 @@ services:
       - "traefik.http.routers.rps.rule=Host(`rps.andrewluther.ca`)"
       - "traefik.http.routers.rps.entrypoints=websecure"
       - "traefik.http.routers.rps.tls.certresolver=dittoresolver"
+      - "com.centurylinklabs.watchtower.enable:true"
 
 networks:
   web:
