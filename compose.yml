@@ -77,5 +77,15 @@ services:
       - "traefik.http.routers.rps.tls.certresolver=dittoresolver"
       - "com.centurylinklabs.watchtower.enable:true"
 
+  gone_fishin:
+    image: ghcr.io/andrewluther/gone-fishin:main
+    restart: always
+    env_file:
+      - ./.runtime-secrets/gone-fishin.env
+    volumes:
+      - ./volumes/gone-fishin:/app/data
+    environment:
+      - DB_FILE_NAME=file:/app/data/cardgame.db
+
 networks:
   web:
