@@ -1,2 +1,2 @@
-./volumes
-./.runtime-secrets
+volumes
+.runtime-secrets
